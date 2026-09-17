@@ -2,22 +2,29 @@
 
 ## Running this build
 
-The backend is a **local Supabase** (Postgres + storage in Docker), so there is nothing to sign up for.
+**Quickest (no setup):**
 
 ```bash
 npm install
-npx supabase start          # needs Docker; applies supabase/migrations
-cp .env.example .env.local  # local URL + the shared local publishable key
-npm run dev                 # http://localhost:3000
+npm run dev        # http://localhost:3000
 ```
 
-Without Supabase running the app still works: it falls back to localStorage and says so in the sidebar ("Saved on this device").
+That is all it needs. With no database configured the library is kept in your browser, survives refresh, and the sidebar says "Saved on this device".
+
+**With the real backend (one command, needs Docker running):**
+
+```bash
+npm install
+npm run demo       # starts local Supabase, writes .env.local, starts the app
+```
+
+`npm run demo` runs `supabase start` (Postgres + storage in Docker, migrations in `supabase/migrations/` applied automatically), writes the local URL and key into `.env.local`, then starts the app. The sidebar will say "Saved to Supabase". The first run downloads the Supabase images, so give it a few minutes. If Docker is not running it says so and starts the app anyway. `npm run demo:stop` shuts Supabase down. Nothing to sign up for, no keys to paste. It uses ports 54421 to 54429, so it will not collide with a Supabase you already run on the defaults.
 
 **It opens with 300 demo songs** so search, filters, sort and "Pick for me" can be tried straight away. They are generated from the three sample files (transposed, re-timed, some given a left hand), titled after real piano repertoire, flagged `generated` in the database, and loaded only once, when both the database and the browser are empty. To see the other states, use **See it at size** in the sidebar: *Empty · 3 songs · 300* switches the library between the first-run state (with starter songs), the three sample files, and the full generated set. Every switch has Undo.
 
 **See my design decisions** (top bar) pins numbered notes onto the live page. Each one quotes a question from this brief and answers it where the answer was built: upload, telling songs apart, finding a song, what to practice, settings, 0 / 3 / 300, persistence. Notes only appear while their subject is on screen, so open a song, play one, or switch the library size to see the rest.
 
-**Data model** (`supabase/migrations/`): a `songs` table where everything a learner sees in a row is a column (key, bpm, length, level, hands, note count, favorite, folder, play count, last played), so the catalogue filters and sorts in SQL without reopening files. A unique `fingerprint` of the notes catches duplicate uploads even when the file is renamed. The piano-roll thumbnail and a capped note list are stored as `jsonb` so the library never reparses MIDI. `folders` is its own table, and the original `.mid` goes to a private `midi` storage bucket. The adapter is `src/lib/db/supabase.ts`; `src/lib/library/store.ts` writes to a local cache first (instant first paint, optimistic UI) and mirrors to Postgres.
+**Data model** (`supabase/migrations/`): a `songs` table where everything a learner sees in a row is a column (key, bpm, length, level, hands, note count, favorite, folder, play count, last played), so the catalogue can be filtered and sorted in SQL without reopening files (at this size the rows load once and filter in the browser; the indexes are there for when it grows). A unique `fingerprint` of the notes catches duplicate uploads even when the file is renamed. The piano-roll thumbnail and a capped note list are stored as `jsonb` so the library never reparses MIDI. `folders` is its own table, and the original `.mid` goes to a private `midi` storage bucket. The adapter is `src/lib/db/supabase.ts`; `src/lib/library/store.ts` writes to a local cache first (instant first paint, optimistic UI) and mirrors to Postgres.
 
 ---
 
