@@ -366,13 +366,18 @@ export function LibraryView() {
         </Portal>
       ) : null}
       {selected && !wide ? (
-        <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label={`Details for ${selected.title}`}>
-          <button type="button" aria-label="Close details" onClick={() => setSelectedId(null)} className="absolute inset-0 bg-ink/30" />
-          {/* Stops above the player, which floats over this dialog. */}
-          <div className="absolute right-2 top-2 w-[380px] max-w-[calc(100vw-16px)] transition-[bottom] duration-200" style={{ bottom: "max(8px, calc(var(--np-h, 0px) + 8px))" }}>
-            <SongDetail song={selected} onClose={() => setSelectedId(null)} onRemove={remove} onNewFolder={newFolder} />
+        <Portal>
+          {/* Portaled like every other overlay: inside the glass panel "fixed"
+              means fixed to the panel, so the dialog was as tall as the whole
+              list and sat at its top, off screen once you had scrolled. */}
+          <div className="fixed inset-0 z-[35] md:left-[var(--rail-w)]" role="dialog" aria-modal="true" aria-label={`Details for ${selected.title}`}>
+            <button type="button" aria-label="Close details" onClick={() => setSelectedId(null)} className="absolute inset-0 bg-ink/30" />
+            {/* Stops above the player, which floats over this dialog. */}
+            <div className="absolute right-2 top-2 w-[380px] max-w-[calc(100vw-16px)] transition-[bottom] duration-200" style={{ bottom: "max(8px, calc(var(--np-h, 0px) + 8px))" }}>
+              <SongDetail song={selected} onClose={() => setSelectedId(null)} onRemove={remove} onNewFolder={newFolder} />
+            </div>
           </div>
-        </div>
+        </Portal>
       ) : null}
 
       {empty && !bigStage ? <StarterSongs onAdd={addStarter} onAddAll={addAllStarters} adding={adding} /> : null}

@@ -56,7 +56,8 @@ const STEPS = [
 function Stepper({ item }: { item: UploadItem }) {
   const idx = stageIndex(item.stage);
   return (
-    <ol className="flex items-center gap-0" aria-label="Progress">
+    /* A phone has room for the four dots and one label: the step in progress. */
+    <ol className="flex items-center gap-1.5 sm:gap-0" aria-label="Progress">
       {STEPS.map((s, i) => {
         const done = i < idx;
         const active = i === idx;
@@ -64,7 +65,7 @@ function Stepper({ item }: { item: UploadItem }) {
           <li key={s.key} className="flex items-center">
             <span className="flex items-center gap-1.5">
               <span
-                className={`grid size-6 place-items-center rounded-full border transition-[background-color,border-color,color,box-shadow] duration-300 ${
+                className={`grid size-6 shrink-0 place-items-center rounded-full border transition-[background-color,border-color,color,box-shadow] duration-300 ${
                   done
                     ? "border-teal bg-teal text-white"
                     : active
@@ -75,10 +76,10 @@ function Stepper({ item }: { item: UploadItem }) {
               >
                 {done ? <IconCheck size={12} /> : s.icon}
               </span>
-              <span className={`text-[12.5px] transition-colors ${active ? "font-semibold text-ink" : done ? "text-ink-soft" : "text-ink-dim"}`}>{s.label}</span>
+              <span className={`whitespace-nowrap text-[12.5px] transition-colors ${active ? "font-semibold text-ink" : done ? "text-ink-soft max-sm:hidden" : "text-ink-dim max-sm:hidden"}`}>{s.label}</span>
             </span>
             {i < STEPS.length - 1 ? (
-              <span className="mx-2.5 h-px w-6 overflow-hidden rounded-full bg-ink/[0.12]" aria-hidden>
+              <span className="mx-2.5 hidden h-px w-6 overflow-hidden rounded-full bg-ink/[0.12] sm:block" aria-hidden>
                 <span className="block h-full rounded-full bg-teal transition-[width] duration-500 ease-out" style={{ width: done ? "100%" : "0%" }} />
               </span>
             ) : null}
@@ -103,17 +104,17 @@ function BigThumb({ item }: { item: UploadItem }) {
   const failed = item.stage === "failed";
   const reading = item.stage === "reading" || item.stage === "queued";
   return (
-    <span className="relative block h-[68px] w-[120px] shrink-0 overflow-hidden rounded-[10px]">
+    <span className="relative block h-8 w-14 shrink-0 overflow-hidden rounded-[10px] max-sm:mt-0.5 sm:h-[68px] sm:w-[120px]">
       <span aria-hidden className={`absolute inset-0 ${failed ? "bg-coral-soft" : "bg-roll"}`} />
       {failed ? (
         <span className="absolute inset-0 grid place-items-center text-coral" aria-hidden>
-          <IconWarn size={22} />
+          <IconWarn size={22} className="max-sm:size-4" />
         </span>
       ) : null}
       {reading && !failed ? <span aria-hidden className="scan-line absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent" /> : null}
       {item.found && !failed ? (
         <span className={`absolute inset-0 ${swept ? "sweep-in" : "sweep-out"}`}>
-          <RollThumb roll={item.found.sprite} width={120} height={68} radius={10} />
+          <RollThumb roll={item.found.sprite} width={120} height={68} radius={10} className="h-full w-full" />
         </span>
       ) : null}
     </span>
@@ -139,12 +140,12 @@ export function AddingRow({
   const idx = stageIndex(item.stage);
 
   return (
-    <div className={`flex items-center gap-4 rounded-[12px] border px-3 py-3 ${failed ? "border-coral/50 bg-coral-soft/40" : "border-sun/70 bg-sun-soft/40"}`} aria-busy={!failed}>
+    <div className={`flex items-start gap-3 rounded-[12px] border px-3 py-3 sm:items-center sm:gap-4 ${failed ? "border-coral/50 bg-coral-soft/40" : "border-sun/70 bg-sun-soft/40"}`} aria-busy={!failed}>
       <BigThumb item={item} />
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className={`truncate text-[15px] font-semibold ${failed ? "text-coral" : "text-ink"}`}>{title}</p>
+        <div className="flex items-center gap-x-2 gap-y-1 max-sm:flex-wrap">
+          <p className={`max-w-full truncate text-[15px] font-semibold ${failed ? "text-coral" : "text-ink"}`}>{title}</p>
           <span className={`shrink-0 rounded-full px-2 py-px font-mono text-[10.5px] uppercase tracking-[0.08em] ${failed ? "bg-coral text-white" : "bg-sun text-sun-ink"}`}>
             {failed ? "Could not add" : "Adding"}
           </span>

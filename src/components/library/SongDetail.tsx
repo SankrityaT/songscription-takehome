@@ -105,7 +105,7 @@ export function SongDetail({ song, onClose, onRemove, onNewFolder }: { song: Son
         </button>
       </div>
 
-      <div className="scroll-quiet min-h-0 flex-1 overflow-y-auto">
+      <div className="scroll-quiet min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {/* title + actions */}
         <div className="px-4 pt-4">
           {editing ? (

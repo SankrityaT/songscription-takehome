@@ -47,11 +47,12 @@ function BigThumb({ item }: { item: UploadItem }) {
   return (
     /* On a phone the roll takes the card's full width, drawn wider and
        shorter so the steps below it stay on screen, and the text sits under it. */
-    <span className={`relative block aspect-[5/2] w-full shrink-0 overflow-hidden rounded-[14px] shadow-[0_18px_40px_rgba(20,19,15,0.18)] sm:aspect-auto sm:h-[132px] sm:w-[232px] ${failed ? "max-sm:hidden" : ""}`}>
-      <span aria-hidden className={`absolute inset-0 ${failed ? "bg-coral-soft" : "bg-roll"}`} />
+    <span className={`relative block aspect-[5/2] w-full shrink-0 overflow-hidden rounded-[14px] shadow-[0_18px_40px_rgba(20,19,15,0.18)] sm:aspect-auto sm:h-[132px] sm:w-[232px] ${failed && !item.found ? "hidden" : ""}`}>
+      <span aria-hidden className="absolute inset-0 bg-roll" />
       {reading && !failed ? <span aria-hidden className="scan-line absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent" /> : null}
-      {item.found && !failed ? (
-        <span className={`absolute inset-0 ${swept ? "sweep-in" : "sweep-out"}`}>
+      {/* A duplicate was read fine, so its roll is shown. A file that could not be read has nothing to show, and the block goes. */}
+      {item.found ? (
+        <span className={`absolute inset-0 ${swept ? "sweep-in" : "sweep-out"} ${failed ? "opacity-60 saturate-50" : ""}`}>
           {/* RollThumb sets display inline, hence the important. */}
           <RollThumb roll={item.found.sprite} width={320} height={128} radius={14} className="h-full w-full sm:!hidden" />
           <RollThumb roll={item.found.sprite} width={232} height={132} radius={14} className="max-sm:!hidden" />

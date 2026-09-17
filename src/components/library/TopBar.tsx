@@ -60,13 +60,18 @@ function ProgressPill({ p }: { p: Progress }) {
   const c = 2 * Math.PI * r;
   const frac = p.total ? p.done / p.total : 0;
   return (
-    <span className="inline-flex items-center gap-2 rounded-full bg-sun-soft px-2.5 py-1 text-[12.5px] text-sun-ink" role="status" aria-live="polite">
+    <span className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-sun-soft px-2.5 py-1 text-[12.5px] text-sun-ink" role="status" aria-live="polite">
       <svg width="18" height="18" viewBox="0 0 18 18" className="-rotate-90" aria-hidden>
         <circle cx="9" cy="9" r={r} fill="none" stroke="rgba(122,90,0,0.18)" strokeWidth="2.5" />
         <circle cx="9" cy="9" r={r} fill="none" stroke="#7A5A00" strokeWidth="2.5" strokeLinecap="round" strokeDasharray={`${frac * c} ${c}`} className="transition-[stroke-dasharray] duration-500 ease-out" />
       </svg>
+      {/* On a phone the pill shares one row with the buttons, so it says "1/3". */}
       <span className="tnum">
-        Adding {Math.min(p.done + 1, p.total)} of {p.total}
+        <span className="max-sm:sr-only">Adding </span>
+        {Math.min(p.done + 1, p.total)}
+        <span className="max-sm:hidden"> of </span>
+        <span className="sm:hidden">/</span>
+        {p.total}
       </span>
       {p.current ? <span className="hidden max-w-[220px] truncate text-sun-ink/70 md:inline">· {p.current}</span> : null}
       {p.failed ? <span className="text-coral">· {p.failed} failed</span> : null}
@@ -98,9 +103,9 @@ export function TopBar({
         <h1 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">Library</h1>
         {progress ? <ProgressPill p={progress} /> : <p className="hidden truncate text-[13px] text-ink-dim md:block">{subtitle}</p>}
       </div>
-      {/* Equal flexible sides keep the field centered and leave the subtitle its room. Below sm the field takes its own row. */}
+      {/* The actions never shrink (they clipped at 1280). From 2xl both sides flex equally, which centers the field. Below sm the field takes its own row. */}
       {total > 0 ? <SearchField className="order-last w-full sm:order-none sm:w-auto sm:max-w-[460px] sm:flex-1" /> : null}
-      <div className="flex items-center justify-end gap-2 sm:flex-1">
+      <div className="flex shrink-0 items-center justify-end gap-2 max-sm:ml-auto 2xl:flex-1">
         <DesignNotesToggle />
         {total > 0 ? <ViewToggle view={view} onChange={onView} /> : null}
         <Button size="sm" variant="primary" onClick={onAdd} icon={<IconPlus size={14} />}>

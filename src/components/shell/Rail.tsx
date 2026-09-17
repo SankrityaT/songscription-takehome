@@ -229,7 +229,7 @@ export function Rail({ onNavigate, forceOpen = false }: { onNavigate?: () => voi
                     onBlur={commitFolder}
                     placeholder="Name this folder"
                     aria-label="New folder name"
-                    className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-dim"
+                    className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-dim max-md:text-[16px]"
                   />
                   <kbd className="shrink-0 rounded-[4px] border border-line bg-card px-1 font-mono text-[9.5px] text-ink-dim">↵</kbd>
                 </div>
@@ -320,7 +320,7 @@ export function Rail({ onNavigate, forceOpen = false }: { onNavigate?: () => voi
                         const before = forgetPlayed([s.id]);
                         pushToast(`“${s.title}” removed from recently played`, { label: "Undo", onClick: () => restorePlayed(before) });
                       }}
-                      className="ring-focus absolute right-1 top-1 grid size-6 place-items-center rounded-[7px] text-ink-dim opacity-0 transition-opacity hover:bg-ink/[0.08] hover:text-ink focus-visible:opacity-100 group-hover/recent:opacity-100 [@media(hover:none)]:opacity-100"
+                      className="ring-focus absolute right-1 top-1 grid size-6 place-items-center rounded-[7px] text-ink-dim opacity-0 transition-opacity hover:bg-ink/[0.08] hover:text-ink focus-visible:opacity-100 group-hover/recent:opacity-100 [@media(hover:none)]:right-0 [@media(hover:none)]:top-0 [@media(hover:none)]:size-8 [@media(hover:none)]:opacity-100"
                     >
                       <IconClose size={12} />
                     </button>

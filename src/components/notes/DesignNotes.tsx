@@ -35,8 +35,8 @@ export function DesignNotesToggle() {
       }`}
     >
       <span className={`grid size-4 place-items-center rounded-full text-[10px] font-semibold leading-none ${on ? "bg-sun-ink text-sun" : "bg-sun text-sun-ink"}`}>?</span>
-      <span className="hidden lg:inline">{on ? "Hide design decisions" : "See my design decisions"}</span>
-      <span className="lg:hidden">Decisions</span>
+      <span className="hidden 2xl:inline">{on ? "Hide design decisions" : "See my design decisions"}</span>
+      <span className="2xl:hidden">{on ? "Hide decisions" : "Design decisions"}</span>
     </button>
   );
 }
@@ -96,7 +96,9 @@ export function DesignNotesLayer() {
   let card: { top?: number; bottom?: number; left: number } | null = null;
   if (current) {
     const left = Math.max(12, Math.min(window.innerWidth - CARD_W - 12, current.rect.left - 6));
-    const below = current.rect.top + 22;
+    /* Under the thing it explains, never on top of it. Tall subjects (the
+       table, a panel) keep the card near the pin instead. */
+    const below = current.rect.height > 140 ? current.rect.top + 26 : current.rect.top + current.rect.height + 12;
     card = below + 230 > window.innerHeight ? { bottom: Math.max(12, window.innerHeight - current.rect.top + 14), left } : { top: below, left };
   }
 

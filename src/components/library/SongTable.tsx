@@ -10,7 +10,7 @@ import { formatDuration } from "@/lib/midi/analyze";
 import { forgetPlayed, markPlayed, moveToFolder, restorePlayed, toggleFavorite, useFolders } from "@/lib/library/store";
 import { player, useNowPlayingId } from "@/lib/audio/player";
 import { playableFromSong } from "@/lib/audio/playable";
-import { pushToast, setFilters, useFilters, type SortKey } from "@/lib/ui-store";
+import { pushToast, setFilters, useFilters, useMinWidth, type SortKey } from "@/lib/ui-store";
 import type { Song } from "@/lib/library/types";
 import type { UploadItem } from "@/hooks/useUploadQueue";
 import { Level } from "./Level";
@@ -31,7 +31,6 @@ export function relative(iso: string) {
 }
 
 const HANDS: Record<Song["hands"], string> = { both: "Both", left: "Left", right: "Right" };
-const COLS = 9;
 
 /* The round play button, always visible, the same one the starters use. */
 export function PlayButton({ playing, title, onClick, size = 36 }: { playing: boolean; title: string; onClick: () => void; size?: number }) {
@@ -174,6 +173,14 @@ export function SongTable({
 }) {
   const nowPlaying = useNowPlayingId();
   const v = (cls: string) => (dense ? "hidden" : cls);
+  /* An adding row spans the table. It must span only the columns showing at
+     this width: in a fixed table every spanned column that is hidden comes
+     back as an empty one, and they squeeze the Song column to nothing. */
+  const sm = useMinWidth(640);
+  const lg = useMinWidth(1024);
+  /* Level, Hands and Added wait for 1536: at 1280 they left the title about 60px. Until then the level rides under the title. */
+  const xl = useMinWidth(1536);
+  const cols = 3 + (sm ? 1 : 0) + (!dense && lg ? 2 : 0) + (!dense && xl ? 3 : 0);
   const paged = useProgressive(rows, 60);
   const folders = useFolders();
   const f = useFilters();
@@ -195,9 +202,9 @@ export function SongTable({
             <Th col={null} label="Key" className={v("hidden w-[120px] lg:table-cell")} />
             <Th col="tempo" label="Tempo" align="right" className={v("hidden w-[92px] lg:table-cell")} />
             <Th col="length" label="Length" align="right" className="hidden w-[76px] sm:table-cell" />
-            <Th col="level" label="Level" className={v("hidden w-[150px] pl-6 xl:table-cell")} />
-            <Th col={null} label="Hands" className={v("hidden w-[80px] xl:table-cell")} />
-            <Th col={showPlayed ? "played" : "added"} label={showPlayed ? "Played" : "Added"} align="right" className={v("hidden w-[104px] xl:table-cell")} />
+            <Th col="level" label="Level" className={v("hidden w-[150px] pl-6 2xl:table-cell")} />
+            <Th col={null} label="Hands" className={v("hidden w-[80px] 2xl:table-cell")} />
+            <Th col={showPlayed ? "played" : "added"} label={showPlayed ? "Played" : "Added"} align="right" className={v("hidden w-[104px] 2xl:table-cell")} />
             <th scope="col" className="h-9 w-[76px] pr-3 font-normal sm:w-[84px]">
               <span className="sr-only">Actions</span>
             </th>
@@ -209,7 +216,7 @@ export function SongTable({
               const it = row.item;
               return (
                 <tr key={it.id} className="animate-row-in border-t border-line">
-                  <td colSpan={COLS} className="p-2">
+                  <td colSpan={cols} className="p-2">
                     <AddingRow item={it} onRetry={() => onRetry(it.id)} onDismiss={() => onDismiss(it.id)} onReplace={() => onReplace(it.id)} onShow={onShow} />
                   </td>
                 </tr>
@@ -286,7 +293,7 @@ export function SongTable({
                         {s.composer || s.fileName}
                         <span className="max-sm:hidden"> · {s.noteCount} notes</span>
                       </p>
-                      <p className={`tnum text-[12px] text-ink-soft sm:truncate ${dense ? "" : "xl:hidden"}`}>
+                      <p className={`tnum text-[12px] text-ink-soft sm:truncate ${dense ? "" : "2xl:hidden"}`}>
                         <span className={`max-sm:block max-sm:truncate ${dense ? "" : "lg:hidden"}`}>
                           {s.key.label} · {s.bpm} bpm
                         </span>
@@ -310,11 +317,11 @@ export function SongTable({
                 </td>
                 <td className={`tnum whitespace-nowrap pr-4 text-right text-ink-soft ${v("hidden lg:table-cell")}`}>{s.bpm} bpm</td>
                 <td className="tnum hidden whitespace-nowrap pr-4 text-right text-ink-soft sm:table-cell">{formatDuration(s.durationSec)}</td>
-                <td className={`whitespace-nowrap pl-6 pr-4 ${v("hidden xl:table-cell")}`}>
+                <td className={`whitespace-nowrap pl-6 pr-4 ${v("hidden 2xl:table-cell")}`}>
                   <Level score={s.difficulty.score} label={s.difficulty.label} />
                 </td>
-                <td className={`whitespace-nowrap pr-4 text-ink-soft ${v("hidden xl:table-cell")}`}>{HANDS[s.hands]}</td>
-                <td className={`tnum whitespace-nowrap pr-4 text-right text-ink-dim ${v("hidden xl:table-cell")}`}>
+                <td className={`whitespace-nowrap pr-4 text-ink-soft ${v("hidden 2xl:table-cell")}`}>{HANDS[s.hands]}</td>
+                <td className={`tnum whitespace-nowrap pr-4 text-right text-ink-dim ${v("hidden 2xl:table-cell")}`}>
                   {showPlayed ? (s.lastPlayedAt ? relative(s.lastPlayedAt) : "Never") : relative(s.addedAt)}
                 </td>
                 <td className="pr-2 text-right">
@@ -353,8 +360,8 @@ export function SongTable({
           </span>
           <span>
             {formatDuration(total)} of music
-            {/* Dragging is a mouse gesture; on touch the row menu removes. */}
-            <span className="[@media(hover:none)]:hidden"> · drag a row to the bin to remove it</span>
+            {/* Dragging is a mouse gesture; on touch the row menu removes. No room for it on a phone either. */}
+            <span className="max-sm:hidden [@media(hover:none)]:hidden"> · drag a row to the bin to remove it</span>
           </span>
         </div>
       ) : null}

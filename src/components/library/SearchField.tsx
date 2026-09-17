@@ -39,7 +39,8 @@ export function SearchField({ className = "" }: { className?: string }) {
         }}
         placeholder="Search, or try “easy in C”"
         aria-label="Search songs"
-        className="min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-ink-dim"
+        /* 16px on phones: iOS zooms the page when a smaller field takes focus. */
+        className="min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-ink-dim max-sm:text-[16px]"
       />
       {search ? (
         <button type="button" aria-label="Clear search" onClick={() => setSearch("")} className="ring-focus grid size-5 place-items-center rounded-[5px] text-ink-dim hover:text-ink">

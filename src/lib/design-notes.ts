@@ -47,7 +47,7 @@ export const NOTES: DesignNote[] = [
     id: "pick",
     asks: "What if they don't know what they want to practice today?",
     title: "can't decide? let it pick",
-    body: "one tap picks a song and tells you why. it just scrolls to it. you can always say no.",
+    body: "one tap picks a song, tells you why, and starts playing it. not feeling it? tap again for another.",
     find: () => noted("pick") ?? byText("button", "Pick for me"),
   },
   {
