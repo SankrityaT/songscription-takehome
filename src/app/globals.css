@@ -277,6 +277,11 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   .glass-panel::after { animation: none; }
 }
+/* On a phone the player sits on top of rows of text. Glass that thin lets
+   the words read through, so below md it is nearly solid. */
+@media (max-width: 767px) {
+  .glass-panel { background: rgba(255, 253, 250, 0.95); }
+}
 
 
 /* The content surface: the same slab as the rail, a little more opaque and
