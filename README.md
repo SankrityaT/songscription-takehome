@@ -1,5 +1,26 @@
 # Songscription Fullstack Take-Home
 
+## Running this build
+
+The backend is a **local Supabase** (Postgres + storage in Docker), so there is nothing to sign up for.
+
+```bash
+npm install
+npx supabase start          # needs Docker; applies supabase/migrations
+cp .env.example .env.local  # local URL + the shared local publishable key
+npm run dev                 # http://localhost:3000
+```
+
+Without Supabase running the app still works: it falls back to localStorage and says so in the sidebar ("Saved on this device").
+
+**It opens with 300 demo songs** so search, filters, sort and "Pick for me" can be tried straight away. They are generated from the three sample files (transposed, re-timed, some given a left hand), titled after real piano repertoire, flagged `generated` in the database, and loaded only once, when both the database and the browser are empty. To see the other states, use **See it at size** in the sidebar: *Empty · 3 songs · 300* switches the library between the first-run state (with starter songs), the three sample files, and the full generated set. Every switch has Undo.
+
+**See my design decisions** (top bar) pins numbered notes onto the live page. Each one quotes a question from this brief and answers it where the answer was built: upload, telling songs apart, finding a song, what to practice, settings, 0 / 3 / 300, persistence. Notes only appear while their subject is on screen, so open a song, play one, or switch the library size to see the rest.
+
+**Data model** (`supabase/migrations/`): a `songs` table where everything a learner sees in a row is a column (key, bpm, length, level, hands, note count, favorite, folder, play count, last played), so the catalogue filters and sorts in SQL without reopening files. A unique `fingerprint` of the notes catches duplicate uploads even when the file is renamed. The piano-roll thumbnail and a capped note list are stored as `jsonb` so the library never reparses MIDI. `folders` is its own table, and the original `.mid` goes to a private `midi` storage bucket. The adapter is `src/lib/db/supabase.ts`; `src/lib/library/store.ts` writes to a local cache first (instant first paint, optimistic UI) and mirrors to Postgres.
+
+---
+
 Thanks for taking the time to do this. This project gives you a feel for the kind of work you'd be doing at Songscription, and gives us a sense of how you think about UI, UX, and backend integration.
 
 ## Product context

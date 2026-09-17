@@ -3,19 +3,372 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --paper: #faf7f5;
+  --ink: #14130f;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
 }
 
 html,
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100%;
 }
+
+body {
+  font-feature-settings: "ss01" 1, "cv11" 1;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+::selection {
+  background: #ffe28a;
+  color: #14130f;
+}
+
+@layer utilities {
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Focus rings via box-shadow, not outline, so they respect border-radius. */
+  .ring-focus {
+    outline: none;
+  }
+  .ring-focus:focus-visible {
+    box-shadow:
+      0 0 0 2px #faf7f5,
+      0 0 0 4px #22877b;
+  }
+
+  /* Five hairlines, the way manuscript paper rules a staff. The only texture
+     on the page. Sits behind the headline and fades out to the right so it
+     reads as paper, not as a table border. */
+  .staff-lines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(20, 19, 15, 0.09) 0,
+      rgba(20, 19, 15, 0.09) 1px,
+      transparent 1px,
+      transparent 16px
+    );
+    background-size: 100% 65px;
+    background-repeat: no-repeat;
+    background-position: 0 var(--staff-top, 0);
+    -webkit-mask-image: linear-gradient(to right, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to right, #000 55%, transparent 100%);
+  }
+
+  .press {
+    transition: transform 100ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .press:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+  }
+  @media (hover: none) {
+    .press:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+  }
+
+  .scroll-quiet {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(20, 19, 15, 0.16) transparent;
+  }
+
+  /* A row that scrolls sideways on a phone, without a scrollbar under it. */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-key-press,
+  .animate-row-in,
+  .animate-breathe,
+  .animate-bar-slide {
+    animation: none !important;
+  }
+  .animate-row-in {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cell-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cell-in {
+  animation: cell-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Thumbnail sweep: the notes appear left to right as they are found. */
+.sweep-in {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sweep-out {
+  clip-path: inset(0 100% 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell-in {
+    animation: none;
+  }
+  .sweep-in,
+  .sweep-out {
+    clip-path: none;
+    transition: none;
+  }
+}
+
+/* A row on its way out: a short fade and slide, then it is gone. */
+.row-out {
+  animation: row-out 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes row-out {
+  to {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .row-out {
+    animation: none;
+  }
+}
+
+/* Feedback that lands on the thing you touched. */
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.35); }
+  70% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.heart-pop { animation: heart-pop 360ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Reading the file: a scan line crossing the dark thumbnail. */
+@keyframes scan {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(400%); }
+}
+.scan-line { animation: scan 900ms cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+
+/* Listening for the key: three bars breathing like a level meter. */
+@keyframes eq {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+.eq-bar { transform-origin: 50% 100%; animation: eq 720ms cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+
+/* Sizing it up: pips fill one after another. */
+@keyframes pip-in {
+  from { transform: scaleY(0.2); opacity: 0.3; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+.pip-in { transform-origin: 50% 100%; animation: pip-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .heart-pop, .scan-line, .eq-bar, .pip-in { animation: none !important; }
+}
+
+/* "Show it" / "Pick for me": the row you were sent to glows once. */
+@keyframes row-flash {
+  0% { box-shadow: inset 0 0 0 0 rgba(255, 226, 138, 0); background-color: rgba(255, 226, 138, 0.55); }
+  100% { box-shadow: inset 0 0 0 0 rgba(255, 226, 138, 0); background-color: transparent; }
+}
+.row-flash { animation: row-flash 1500ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@media (prefers-reduced-motion: reduce) { .row-flash { animation: none; background-color: rgba(255, 226, 138, 0.4); } }
+
+
+/* Ambient backdrop so the glass has something to refract: two soft warm
+   pools of light on the cream, fixed to the viewport. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 600px at 8% 0%, rgba(34, 135, 123, 0.10), transparent 60%),
+    radial-gradient(700px 500px at 30% 100%, rgba(255, 226, 138, 0.22), transparent 60%),
+    radial-gradient(600px 400px at 95% 40%, rgba(34, 135, 123, 0.05), transparent 60%);
+}
+
+/* Liquid glass panel: translucent cream, heavy blur, a bright inner edge on
+   top, and a slow sheen drifting across so the surface reads as glass, not
+   as a flat tint. */
+.glass-panel {
+  isolation: isolate;
+  background: rgba(255, 253, 250, 0.62);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(20, 19, 15, 0.04),
+    0 1px 0 rgba(20, 19, 15, 0.03),
+    0 18px 50px rgba(45, 41, 33, 0.12);
+}
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 60% at 0% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.35) 0%, transparent 40%, transparent 70%, rgba(255, 255, 255, 0.18) 100%);
+}
+.glass-panel::after {
+  content: "";
+  position: absolute;
+  inset: -40% -60%;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 44%, rgba(255, 255, 255, 0.16) 50%, transparent 56%);
+  animation: sheen 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  mix-blend-mode: screen;
+}
+@keyframes sheen {
+  0%, 100% { transform: translateX(-18%); }
+  50% { transform: translateX(18%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-panel::after { animation: none; }
+}
+
+
+/* The content surface: the same slab as the rail, a little more opaque and
+   a little less blurred, so the two read as slices of one thing. */
+.glass-panel-soft {
+  background: rgba(255, 253, 250, 0.72);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 0 rgba(20, 19, 15, 0.03),
+    0 18px 50px rgba(45, 41, 33, 0.08);
+}
+
+/* Hover that means something: the button fills from the left, the way a
+   key sinks under a finger. Shadow no longer carries the hover on its own. */
+.btn-fill {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-fill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--fill, rgba(34, 135, 123, 0.12));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: inherit;
+}
+@media (hover: hover) {
+  .btn-fill:hover:not(:disabled)::before {
+    transform: scaleX(1);
+  }
+}
+.btn-fill:focus-visible::before {
+  transform: scaleX(1);
+}
+/* Icon nudges with the fill. */
+.btn-fill > .btn-ico {
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (hover: hover) {
+  .btn-fill:hover:not(:disabled) > .btn-ico {
+    transform: translateX(1px) scale(1.08);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-fill::before, .btn-fill > .btn-ico { transition: none; }
+}
+
+/* Stage art motion */
+@keyframes scan-y { from { transform: translateY(0); } to { transform: translateY(110px); } }
+.scan-y { animation: scan-y 1.1s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate; }
+@keyframes ring-out { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(2.2); opacity: 0; } }
+.ring-out { transform-origin: 120px 78px; animation: ring-out 1.6s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+@keyframes key-lit { 0%, 100% { opacity: 0; } 25%, 45% { opacity: 0.9; } }
+.key-lit { animation: key-lit 1.9s ease-in-out infinite; }
+@keyframes pop-in { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.pop-in { transform-origin: 120px 76px; animation: pop-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes draw-in { from { stroke-dasharray: 80; stroke-dashoffset: 80; } to { stroke-dasharray: 80; stroke-dashoffset: 0; } }
+.draw-in { animation: draw-in 420ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both; }
+@media (prefers-reduced-motion: reduce) {
+  .scan-y, .ring-out, .key-lit, .pop-in, .draw-in { animation: none; }
+  .key-lit { opacity: 0.6; }
+}
+
+/* Volume slider: a thin track filled to the current level, a small ink thumb. */
+input.vol {
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right, #14130F var(--pct, 80%), rgba(20, 19, 15, 0.12) var(--pct, 80%));
+  border-radius: 999px;
+  outline: none;
+}
+input.vol::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #14130F;
+  border: 2px solid #FFFDFB;
+  box-shadow: 0 1px 3px rgba(20, 19, 15, 0.3);
+}
+input.vol::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #14130F;
+  border: 2px solid #FFFDFB;
+}
+input.vol:focus-visible { box-shadow: 0 0 0 2px #faf7f5, 0 0 0 4px #22877b; }
