@@ -2,6 +2,8 @@
 
 ## Running this build
 
+**Live:** https://songscription-library.vercel.app (no setup). The hosted copy has no database, so it keeps your library in your browser. Run it locally with `npm run demo` to see the Supabase backend.
+
 **Quickest (no setup):**
 
 ```bash
